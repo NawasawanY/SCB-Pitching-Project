@@ -8,204 +8,160 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Sparkles,
-  TrendingUp,
-  Users,
   Target,
   Clock,
-  ArrowRight,
   CheckCircle2,
   Zap,
-  Copy,
-  Calendar,
-  ThumbsUp,
-  ThumbsDown,
   RefreshCw,
-  ChevronRight,
-  BarChart3,
-  MessageSquare,
+  Newspaper,
+  ExternalLink,
 } from "lucide-react"
+import Link from "next/link"
 
-
-// AI Generated Campaign Recommendations
+// AI Generated Campaign Recommendations linked to news
 const aiRecommendations = [
   {
     id: 1,
     rank: 1,
     confidence: 96,
     status: "hot",
-    trend: {
-      name: "#SongkranSale",
-      category: "Lifestyle",
-      volume: "125K",
-      peakWindow: "2-4 days",
+    linkedNews: {
+      headline: "กนง. มีมติ 5-2 คงดอกเบี้ย พร้อมส่งสัญญาณลดรอบถัดไป",
+      source: "Bank of Thailand",
+      category: "Rate Change",
+      impact: "High",
     },
     campaign: {
-      title: "Songkran Festival Cashback Blast",
-      headline: "สงกรานต์นี้ รับ Cashback สูงสุด 20%",
-      description: "ฉลองเทศกาลสงกรานต์กับ SCB! รับเงินคืนสูงสุด 20% เมื่อใช้จ่ายผ่านบัตรเครดิต SCB ทุกประเภท ที่ร้านค้าชั้นนำทั่วประเทศ ตั้งแต่วันนี้ - 15 เม.ย. 69",
-      cta: "สมัครรับสิทธิ์เลย",
-      channels: ["SMS", "Push Notification", "Email", "In-App Banner"],
+      title: "Fixed Deposit Rate Lock Campaign",
+      headline: "ล็อคดอกเบี้ยสูงก่อนลด! เงินฝากประจำ SCB 2.75%",
+      description: "โอกาสสุดท้ายก่อนดอกเบี้ยลด! เปิดบัญชีเงินฝากประจำ SCB รับดอกเบี้ยสูงถึง 2.75% ต่อปี ล็อคอัตราดอกเบี้ยนาน 12 เดือน ฝากขั้นต่ำเพียง 10,000 บาท เริ่มต้นวันนี้ - สิ้นเดือนนี้เท่านั้น",
+      cta: "เปิดบัญชีเลย",
     },
     targetGroup: {
-      name: "Urban Millennials",
-      size: "2.4M",
-      ageRange: "25-35",
+      name: "Prime",
+      size: "890K",
       matchScore: 94,
     },
     predictions: {
-      conversionRate: 4.8,
-      marketBenchmark: 2.8,
-      expectedReach: 1420000,
-      estimatedROI: 4.2,
-      engagementRate: 9.2,
+      expectedSent: 520000,
+      expectedCTR: 0.4,
+      expectedCVS: 0.8,
+      expectedTransactions: 4400,
+      expectedAllotment: 8800000,
     },
-    metrics: [
-      { name: "Trend Match", value: 95 },
-      { name: "Audience Fit", value: 94 },
-      { name: "Timing", value: 98 },
-      { name: "Conversion", value: 88 },
-      { name: "ROI Potential", value: 92 },
-    ],
     reasoning: [
-      "เทรนด์กำลังอยู่ในช่วง peak growth (+45% ใน 24 ชม.)",
-      "กลุ่มเป้าหมายมี purchase intent สูงในช่วงเทศกาล",
-      "Historical data แสดงว่า cashback campaigns ในช่วงเทศกาลมี conversion สูง 2x",
-      "ควรเริ่ม campaign ภายใน 48 ชม. เพื่อจับ peak timing",
+      "ข่าว BOT ส่งสัญญาณลดดอกเบี้ย สร้าง urgency ให้ลูกค้าล็อคอัตราดอกเบี้ยสูงก่อน",
+      "กลุ่ม Prime มี idle cash สูง เหมาะกับการฝากประจำ",
+      "Historical data: campaign Fixed Deposit หลังข่าวดอกเบี้ยมี conversion สูง 3x",
+      "ควรเริ่ม campaign ภายใน 24-48 ชม. ก่อนข่าวเย็นลง",
     ],
   },
   {
     id: 2,
     rank: 2,
-    confidence: 89,
-    status: "recommended",
-    trend: {
-      name: "K-Pop Comeback",
-      category: "Entertainment",
-      volume: "98K",
-      peakWindow: "5-7 days",
+    confidence: 92,
+    status: "hot",
+    linkedNews: {
+      headline: "SET Index ปิดบวก 15 จุด มูลค่าซื้อขายทะลุ 8 หมื่นล้าน",
+      source: "SET Announcements",
+      category: "Market Volatility",
+      impact: "High",
     },
     campaign: {
-      title: "K-Pop Fan Exclusive Benefits",
-      headline: "สิทธิพิเศษสำหรับแฟนคลับ K-Pop ตัวจริง!",
-      description: "สมัครบัตรเครดิต SCB วันนี้ รับสิทธิ์ซื้อบัตรคอนเสิร์ต presale + ส่วนลด merchandise 15% + สะสมคะแนนแลก meet & greet",
-      cta: "สมัครบัตร K-Pop Fan Card",
-      channels: ["Social Media", "Influencer", "LINE OA", "TikTok"],
+      title: "Equity Fund Investment Promotion",
+      headline: "ตลาดหุ้นขาขึ้น! เริ่มลงทุนกองทุนหุ้นไทยวันนี้",
+      description: "จับจังหวะตลาดหุ้นขาขึ้น ลงทุนกองทุนหุ้นไทย SCB SET50 Index Fund ค่าธรรมเนียมซื้อ 0% ตลอดเดือนนี้ เริ่มต้นเพียง 1,000 บาท พร้อมรับรายงานวิเคราะห์ตลาดรายสัปดาห์ฟรี",
+      cta: "ลงทุนเลย",
     },
     targetGroup: {
-      name: "Gen Z Digital Natives",
-      size: "1.8M",
-      ageRange: "18-24",
-      matchScore: 87,
+      name: "Wealth Potential",
+      size: "1.5M",
+      matchScore: 88,
     },
     predictions: {
-      conversionRate: 3.9,
-      marketBenchmark: 2.5,
-      expectedReach: 980000,
-      estimatedROI: 3.5,
-      engagementRate: 12.4,
+      expectedSent: 680000,
+      expectedCTR: 0.35,
+      expectedCVS: 0.7,
+      expectedTransactions: 4800,
+      expectedAllotment: 7200000,
     },
-    metrics: [
-      { name: "Trend Match", value: 92 },
-      { name: "Audience Fit", value: 87 },
-      { name: "Timing", value: 85 },
-      { name: "Conversion", value: 82 },
-      { name: "ROI Potential", value: 78 },
-    ],
     reasoning: [
-      "กระแส K-Pop comeback กำลังเติบโตอย่างรวดเร็ว",
-      "Gen Z มี brand loyalty สูงกับ K-Pop idols",
-      "การผูกโปรโมชั่นกับคอนเสิร์ตจะสร้าง urgency",
-      "Social sharing potential สูง ช่วยเพิ่ม organic reach",
+      "SET Index ทำ new high สร้าง positive sentiment ในตลาด",
+      "นักลงทุนรายย่อยมักตามกระแสตลาดขาขึ้น",
+      "กลุ่ม Wealth Potential มีความสนใจในการลงทุนสูง",
+      "ค่าธรรมเนียม 0% เป็น strong incentive ในช่วงตลาดบวก",
     ],
   },
   {
     id: 3,
     rank: 3,
-    confidence: 84,
+    confidence: 89,
     status: "recommended",
-    trend: {
-      name: "AI Investment",
-      category: "Finance",
-      volume: "87K",
-      peakWindow: "14-21 days",
+    linkedNews: {
+      headline: "SCB เปิดตัวกองทุน AI Technology Fund ผลตอบแทน YTD +24%",
+      source: "Prachachat Business",
+      category: "Fund Launch",
+      impact: "High",
     },
     campaign: {
-      title: "AI Tech Fund Investment Package",
-      headline: "ลงทุนในอนาคต กับ AI Technology Fund",
-      description: "เริ่มต้นลงทุนในกองทุน AI & Technology ของ SCB เริ่มต้นเพียง 1,000 บาท พร้อมรับบทวิเคราะห์เชิงลึกฟรี และค่าธรรมเนียมซื้อ 0% ตลอดเดือนเมษายน",
-      cta: "เริ่มลงทุนเลย",
-      channels: ["Email", "SCB Easy App", "Website Banner", "LINE OA"],
+      title: "AI Tech Fund Launch Campaign",
+      headline: "ลงทุนในอนาคต กับ SCB AI Technology Fund",
+      description: "เปิดตัวกองทุนใหม่! SCB AI Technology Fund ลงทุนในหุ้น AI และเทคโนโลยีชั้นนำระดับโลก ผลตอบแทนตั้งแต่ต้นปี +24% เริ่มต้นลงทุนเพียง 1,000 บาท รับบทวิเคราะห์เชิงลึก AI Trends ฟรี",
+      cta: "ศึกษากองทุน",
     },
     targetGroup: {
-      name: "Tech-Savvy Investors",
-      size: "890K",
-      ageRange: "30-50",
+      name: "First",
+      size: "320K",
       matchScore: 91,
     },
     predictions: {
-      conversionRate: 5.2,
-      marketBenchmark: 3.2,
-      expectedReach: 520000,
-      estimatedROI: 5.8,
-      engagementRate: 6.8,
+      expectedSent: 180000,
+      expectedCTR: 0.5,
+      expectedCVS: 0.9,
+      expectedTransactions: 1600,
+      expectedAllotment: 4000000,
     },
-    metrics: [
-      { name: "Trend Match", value: 88 },
-      { name: "Audience Fit", value: 91 },
-      { name: "Timing", value: 75 },
-      { name: "Conversion", value: 92 },
-      { name: "ROI Potential", value: 95 },
-    ],
     reasoning: [
-      "กระแส AI investment เป็น long-term trend",
-      "Target group มี investment appetite สูง",
-      "มี timeframe ยืดหยุ่นกว่า campaigns อื่น",
-      "High-value conversion แม้ reach น้อยกว่า",
+      "กองทุนใหม่ได้รับความสนใจจากสื่อ สร้าง awareness สูง",
+      "ผลตอบแทน +24% YTD เป็น strong selling point",
+      "กลุ่ม First มี investment appetite และรับความเสี่ยงได้",
+      "เทรนด์ AI investment เป็น long-term growth trend",
     ],
   },
   {
     id: 4,
     rank: 4,
-    confidence: 78,
-    status: "consider",
-    trend: {
-      name: "Summer Travel",
-      category: "Travel",
-      volume: "76K",
-      peakWindow: "21-30 days",
+    confidence: 82,
+    status: "recommended",
+    linkedNews: {
+      headline: "สินเชื่อบ้านไตรมาส 2 คาดโต 8% หลังดอกเบี้ยมีแนวโน้มลด",
+      source: "Thairath Business",
+      category: "Macroeconomic",
+      impact: "Medium",
     },
     campaign: {
-      title: "Summer Getaway Travel Loan",
-      headline: "ฝันอยากไปเที่ยว? SCB ช่วยได้",
-      description: "สินเชื่อท่องเที่ยว SCB ดอกเบี้ยพิเศษ 0.89% ต่อเดือน อนุมัติไว ภายใน 24 ชม. วงเงินสูงสุด 500,000 บาท พร้อมประกันการเดินทางฟรี",
-      cta: "สมัครสินเชื่อเลย",
-      channels: ["Facebook", "Instagram", "Google Ads", "Travel Agency Partner"],
+      title: "Home Loan Refinance Promotion",
+      headline: "รีไฟแนนซ์บ้านตอนนี้ ดอกเบี้ยต่ำที่สุด!",
+      description: "รีไฟแนนซ์สินเชื่อบ้านกับ SCB ดอกเบี้ยเริ่มต้น 2.99% ต่อปี ฟรีค่าประเมินราคา ฟรีค่าจดจำนอง อนุมัติไว ภายใน 3 วันทำการ วงเงินสูงสุด 50 ล้านบาท",
+      cta: "คำนวณวงเงิน",
     },
     targetGroup: {
-      name: "Young Families",
-      size: "1.2M",
-      ageRange: "28-40",
-      matchScore: 72,
+      name: "Upper Mass",
+      size: "2.4M",
+      matchScore: 78,
     },
     predictions: {
-      conversionRate: 3.2,
-      marketBenchmark: 2.1,
-      expectedReach: 680000,
-      estimatedROI: 3.1,
-      engagementRate: 5.4,
+      expectedSent: 850000,
+      expectedCTR: 0.3,
+      expectedCVS: 0.55,
+      expectedTransactions: 4900,
+      expectedAllotment: 9800000,
     },
-    metrics: [
-      { name: "Trend Match", value: 78 },
-      { name: "Audience Fit", value: 72 },
-      { name: "Timing", value: 68 },
-      { name: "Conversion", value: 75 },
-      { name: "ROI Potential", value: 72 },
-    ],
     reasoning: [
-      "เทรนด์ยังอยู่ในช่วง early growth",
-      "สามารถรอ timing ที่ดีกว่าได้",
-      "ควร monitor ต่อและเตรียม campaign ไว้",
-      "อาจเริ่ม soft launch ก่อน full campaign",
+      "ข่า���สินเชื่อบ้านโตสร้าง context ที่ดีสำหรับ refinance campaign",
+      "ลูกค้าที่มีสินเชื่อบ้านอยู่แล้วอาจมองหา rate ที่ดีกว่า",
+      "กลุ่ม Upper Mass มีสัดส่วนผู้มีสินเชื่อบ้านสูง",
+      "Campaign นี้มี longer runway สามารถทำได้ต่อเนื่อง",
     ],
   },
 ]
@@ -222,7 +178,7 @@ export default function RecommendationsPage() {
   return (
     <DashboardLayout
       title="AI Recommendations"
-      subtitle="AI-generated campaign recommendations based on trends and customer demographics"
+      subtitle="AI-generated campaign recommendations based on real-time financial news"
     >
       <div className="space-y-6">
         {/* Header Stats */}
@@ -236,17 +192,25 @@ export default function RecommendationsPage() {
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4" />
-              Last updated: 5 mins ago
+              Based on news from last 24 hours
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleRegenerate}
-            disabled={isGenerating}
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
-            {isGenerating ? "Regenerating..." : "Regenerate Recommendations"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/">
+              <Button variant="outline">
+                <Newspaper className="mr-2 h-4 w-4" />
+                View News Feed
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              onClick={handleRegenerate}
+              disabled={isGenerating}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
+              {isGenerating ? "Regenerating..." : "Regenerate All"}
+            </Button>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -254,7 +218,7 @@ export default function RecommendationsPage() {
           {/* Campaign List */}
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-muted-foreground">
-              Recommended Campaigns (Ranked by AI)
+              Campaigns Linked to News
             </h3>
             {aiRecommendations.map((rec) => (
               <Card
@@ -277,13 +241,11 @@ export default function RecommendationsPage() {
                         {rec.rank}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium text-foreground line-clamp-1">
-                            {rec.campaign.title}
-                          </h4>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {rec.trend.name} • {rec.targetGroup.name}
+                        <h4 className="font-medium text-foreground line-clamp-1">
+                          {rec.campaign.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground line-clamp-1">
+                          {rec.linkedNews.headline}
                         </p>
                       </div>
                     </div>
@@ -291,22 +253,19 @@ export default function RecommendationsPage() {
                       className={
                         rec.status === "hot" 
                           ? "bg-red-100 text-red-700"
-                          : rec.status === "recommended"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
+                          : "bg-green-100 text-green-700"
                       }
                     >
-                      {rec.status === "hot" ? "Hot" : rec.status === "recommended" ? "Recommended" : "Consider"}
+                      {rec.status === "hot" ? "Hot" : "Recommended"}
                     </Badge>
                   </div>
                   <div className="mt-3 flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Target className="h-3.5 w-3.5" />
-                      <span>{rec.predictions.conversionRate}% conv.</span>
-                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {rec.linkedNews.category}
+                    </Badge>
                     <div className="flex items-center gap-1 text-primary font-medium">
                       <Zap className="h-3.5 w-3.5" />
-                      <span>{rec.confidence}% confidence</span>
+                      <span>{rec.confidence}%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -317,29 +276,38 @@ export default function RecommendationsPage() {
           {/* Campaign Detail */}
           <Card className="lg:col-span-2">
             <CardHeader className="border-b border-border pb-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-primary/10 text-primary">
-                      {selectedCampaign.trend.name}
-                    </Badge>
-                    <Badge variant="outline">
-                      {selectedCampaign.trend.category}
-                    </Badge>
-                  </div>
-                  <CardTitle className="mt-2 text-xl">
-                    {selectedCampaign.campaign.title}
-                  </CardTitle>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Target: {selectedCampaign.targetGroup.name} ({selectedCampaign.targetGroup.size} users)
-                  </p>
+              {/* Linked News Source */}
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 mb-4">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                  <Newspaper className="h-3.5 w-3.5" />
+                  <span>Based on news from {selectedCampaign.linkedNews.source}</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">
-                    {selectedCampaign.confidence}%
-                  </div>
-                  <p className="text-xs text-muted-foreground">AI Confidence</p>
+                <p className="text-sm font-medium text-foreground line-clamp-2">
+                  {selectedCampaign.linkedNews.headline}
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline" className="text-xs">
+                    {selectedCampaign.linkedNews.category}
+                  </Badge>
+                  <Badge 
+                    className={
+                      selectedCampaign.linkedNews.impact === "High" 
+                        ? "bg-red-100 text-red-700 text-xs"
+                        : "bg-yellow-100 text-yellow-700 text-xs"
+                    }
+                  >
+                    {selectedCampaign.linkedNews.impact} Impact
+                  </Badge>
                 </div>
+              </div>
+
+              <div>
+                <CardTitle className="text-xl">
+                  {selectedCampaign.campaign.title}
+                </CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Target: {selectedCampaign.targetGroup.name} ({selectedCampaign.targetGroup.size} users)
+                </p>
               </div>
             </CardHeader>
 
@@ -351,70 +319,116 @@ export default function RecommendationsPage() {
                 </TabsList>
 
                 <TabsContent value="campaign" className="mt-4 space-y-4">
-                  {/* Campaign Content */}
-                  <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                    <h4 className="text-lg font-semibold text-foreground">
-                      {selectedCampaign.campaign.headline}
-                    </h4>
-                    <p className="mt-2 text-muted-foreground">
-                      {selectedCampaign.campaign.description}
-                    </p>
-                    <Button className="mt-4">
-                      {selectedCampaign.campaign.cta}
-                    </Button>
-                  </div>
-
-                  {/* Channels */}
+                  {/* Multi-Variant Message Generation */}
                   <div>
-                    <h5 className="text-sm font-medium text-foreground mb-2">
-                      Recommended Channels
-                    </h5>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedCampaign.campaign.channels.map((channel) => (
-                        <Badge key={channel} variant="outline">
-                          {channel}
-                        </Badge>
-                      ))}
+                    <div className="space-y-3">
+                      {/* Variant A - Urgency */}
+                      <div className="rounded-lg border border-primary bg-primary/5 p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge className="bg-primary/10 text-primary">Variant A - Urgency</Badge>
+                          <Badge variant="outline" className="text-green-600">Recommended</Badge>
+                        </div>
+                        <h4 className="text-lg font-semibold text-foreground">
+                          {selectedCampaign.campaign.headline}
+                        </h4>
+                        <p className="mt-2 text-muted-foreground">
+                          {selectedCampaign.campaign.description}
+                        </p>
+                        <Button className="mt-3" size="sm">
+                          {selectedCampaign.campaign.cta}
+                        </Button>
+                      </div>
+
+                      {/* Variant B - Educational */}
+                      <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="secondary">Variant B - Educational</Badge>
+                        </div>
+                        <h4 className="text-lg font-semibold text-foreground">
+                          รู้หรือไม่? ตอนนี้คือจังหวะที่ดีในการลงทุน
+                        </h4>
+                        <p className="mt-2 text-muted-foreground">
+                          จากสถานการณ์ตลาดล่าสุด SCB มีผลิตภัณฑ์ที่ตอบโจทย์การลงทุนของคุณ เรียนรู้เพิ่มเติมเกี่ยวกับโอกาสและสิทธิประโยชน์ที่รอคุณอยู่
+                        </p>
+                        <Button className="mt-3" size="sm" variant="outline">
+                          เรียนรู้เพิ่มเติม
+                        </Button>
+                      </div>
+
+                      {/* Variant C - Opportunity */}
+                      <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="secondary">Variant C - Opportunity</Badge>
+                        </div>
+                        <h4 className="text-lg font-semibold text-foreground">
+                          โอกาสพิเศษเฉพาะคุณจากข่าวการเงินล่าสุด!
+                        </h4>
+                        <p className="mt-2 text-muted-foreground">
+                          เราเลือกข้อเสนอนี้มาเพื่อคุณโดยเฉพาะ บนพื้นฐานของสถานการณ์ตลาดปัจจุบัน SCB พร้อมช่วยให้คุณบรรลุเป้าหมายทางการเงิน
+                        </p>
+                        <Button className="mt-3" size="sm" variant="outline">
+                          รับข้อเสนอพิเศษ
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Quick Stats */}
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="rounded-lg border border-border p-3 text-center">
-                      <p className="text-2xl font-bold text-foreground">
-                        {(selectedCampaign.predictions.expectedReach / 1000000).toFixed(1)}M
-                      </p>
-                      <p className="text-xs text-muted-foreground">Expected Reach</p>
+                  {/* Expected KPIs */}
+                  <div className="rounded-lg border border-border p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h5 className="text-sm font-medium text-foreground">
+                        Expected Campaign KPIs
+                      </h5>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Benchmark: CTR 0.3% | CVS 0.6%</span>
+                      </div>
                     </div>
-                    <div className="rounded-lg border border-border p-3 text-center">
-                      <p className="text-2xl font-bold text-green-600">
-                        {selectedCampaign.predictions.conversionRate}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">Predicted Conversion</p>
-                    </div>
-                    <div className="rounded-lg border border-border p-3 text-center">
-                      <p className="text-2xl font-bold text-foreground">
-                        {selectedCampaign.predictions.estimatedROI}x
-                      </p>
-                      <p className="text-xs text-muted-foreground">Estimated ROI</p>
+                    <div className="grid gap-6 sm:grid-cols-5">
+                      <div className="rounded-lg bg-secondary/50 p-3 text-center">
+                        <p className="text-2xl font-bold text-foreground">
+                          {(selectedCampaign.predictions.expectedSent / 1000).toFixed(0)}K
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Expected Sent</p>
+                      </div>
+                      <div className="rounded-lg bg-primary/10 p-3 text-center">
+                        <p className="text-2xl font-bold text-primary">
+                          {selectedCampaign.predictions.expectedCTR}%
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Expected CTR</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">above benchmark</p>
+
+                      </div>
+                      <div className="rounded-lg bg-primary/10 p-3 text-center">
+                        <p className="text-2xl font-bold text-primary">
+                          {selectedCampaign.predictions.expectedCVS}%
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Expected CVS</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">above benchmark</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/50 p-3 text-center">
+                        <p className="text-2xl font-bold text-foreground">
+                          {selectedCampaign.predictions.expectedTransactions.toLocaleString()}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Expected Trans</p>
+                      </div>
+                      <div className="rounded-lg bg-secondary/50 p-3 text-center">
+                        <p className="text-2xl font-bold text-foreground">
+                          {(selectedCampaign.predictions.expectedAllotment / 1000000).toFixed(0)}M
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Allotment (THB)</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex gap-3 pt-2">
-                    <Button className="flex-1">
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Launch Campaign
-                    </Button>
-                    <Button variant="outline">
-                      <Copy className="mr-2 h-4 w-4" />
-                      Copy Content
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <ThumbsUp className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <ThumbsDown className="h-4 w-4" />
+                  {/* Regenerate Button */}
+                  <div className="flex justify-end">
+                    <Button 
+                      variant="outline" 
+                      onClick={handleRegenerate}
+                      disabled={isGenerating}
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
+                      {isGenerating ? "Generating..." : "Regenerate This Campaign"}
                     </Button>
                   </div>
                 </TabsContent>
@@ -437,19 +451,27 @@ export default function RecommendationsPage() {
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-lg border border-border p-4">
-                      <h5 className="font-medium text-foreground">Trend Analysis</h5>
+                      <h5 className="font-medium text-foreground">News Context</h5>
                       <div className="mt-3 space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Current Volume</span>
-                          <span className="font-medium text-foreground">{selectedCampaign.trend.volume}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Peak Window</span>
-                          <span className="font-medium text-foreground">{selectedCampaign.trend.peakWindow}</span>
+                          <span className="text-muted-foreground">Source</span>
+                          <span className="font-medium text-foreground">{selectedCampaign.linkedNews.source}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Category</span>
-                          <span className="font-medium text-foreground">{selectedCampaign.trend.category}</span>
+                          <span className="font-medium text-foreground">{selectedCampaign.linkedNews.category}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Impact</span>
+                          <Badge 
+                            className={
+                              selectedCampaign.linkedNews.impact === "High" 
+                                ? "bg-red-100 text-red-700"
+                                : "bg-yellow-100 text-yellow-700"
+                            }
+                          >
+                            {selectedCampaign.linkedNews.impact}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -462,8 +484,8 @@ export default function RecommendationsPage() {
                           <span className="font-medium text-foreground">{selectedCampaign.targetGroup.name}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Age Range</span>
-                          <span className="font-medium text-foreground">{selectedCampaign.targetGroup.ageRange}</span>
+                          <span className="text-muted-foreground">Size</span>
+                          <span className="font-medium text-foreground">{selectedCampaign.targetGroup.size}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Match Score</span>
@@ -471,6 +493,15 @@ export default function RecommendationsPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="flex justify-center">
+                    <Link href="/">
+                      <Button variant="outline">
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        View Original News
+                      </Button>
+                    </Link>
                   </div>
                 </TabsContent>
               </Tabs>

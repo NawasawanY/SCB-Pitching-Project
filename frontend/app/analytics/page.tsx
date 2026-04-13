@@ -1,33 +1,31 @@
 "use client"
 
+import { useState, useMemo } from "react"
 import { DashboardLayout } from "@/components/dashboard/dashboard-layout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+
 import {
   TrendingUp,
   TrendingDown,
-  Target,
-  BarChart3,
-  PieChart as PieChartIcon,
-  Calendar,
   Download,
   RefreshCw,
+  AlertTriangle,
+  Send,
+  MousePointer,
+  DollarSign,
+  FileText,
+  Zap,
+  Target,
   ArrowUpRight,
   ArrowDownRight,
-  Activity,
-  Zap,
-  DollarSign,
-  Users,
-  Clock,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
 } from "lucide-react"
 import {
   AreaChart,
@@ -37,653 +35,640 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  ComposedChart,
-  Legend,
 } from "recharts"
 
-const monthlyPerformance = [
-  { month: "Jan", campaigns: 12, conversions: 4500, revenue: 2800000, roi: 2.8 },
-  { month: "Feb", campaigns: 15, conversions: 5200, revenue: 3200000, roi: 3.1 },
-  { month: "Mar", campaigns: 18, conversions: 6800, revenue: 4100000, roi: 3.4 },
-  { month: "Apr", campaigns: 22, conversions: 8900, revenue: 5500000, roi: 3.8 },
-  { month: "May", campaigns: 25, conversions: 11200, revenue: 7200000, roi: 4.2 },
-  { month: "Jun", campaigns: 28, conversions: 14500, revenue: 9100000, roi: 4.5 },
+// Seeded random for deterministic values (avoids hydration mismatch)
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed * 9999) * 10000
+  return x - Math.floor(x)
+}
+
+// Static campaign data to avoid hydration issues
+const campaigns = [
+  { id: 1, name: "Interest Rate Cut - Fixed Deposit", sent: 485000, clicked: 12850, ctr: 2.65, ctrTarget: 2.4, transAll: 1028, transModeled: 654, cvsAll: "1.85", cvsModeled: 1.35, cvsTarget: 1.2, allotment: 15000000, fee: 425000, performance: "above", segment: "Prime" },
+  { id: 2, name: "AI Tech Fund Launch", sent: 320000, clicked: 7680, ctr: 2.4, ctrTarget: 2.5, transAll: 614, transModeled: 312, cvsAll: "1.42", cvsModeled: 0.98, cvsTarget: 1.1, allotment: 8500000, fee: 198000, performance: "on-track", segment: "Wealth Potential" },
+  { id: 3, name: "Home Loan Refinance Q2", sent: 180000, clicked: 2520, ctr: 1.4, ctrTarget: 2.2, transAll: 202, transModeled: 52, cvsAll: "0.45", cvsModeled: 0.29, cvsTarget: 0.8, allotment: 25000000, fee: 65000, performance: "below", segment: "First" },
+  { id: 4, name: "Credit Card Cashback Promo", sent: 520000, clicked: 14560, ctr: 2.8, ctrTarget: 2.3, transAll: 1165, transModeled: 728, cvsAll: "1.95", cvsModeled: 1.4, cvsTarget: 1.0, allotment: 12000000, fee: 380000, performance: "above", segment: "Mass" },
+  { id: 5, name: "Savings Account Welcome", sent: 280000, clicked: 5320, ctr: 1.9, ctrTarget: 2.0, transAll: 426, transModeled: 266, cvsAll: "1.15", cvsModeled: 0.95, cvsTarget: 0.9, allotment: 6500000, fee: 142000, performance: "on-track", segment: "Mass" },
+  { id: 6, name: "Auto Loan Spring Sale", sent: 145000, clicked: 2175, ctr: 1.5, ctrTarget: 2.1, transAll: 174, transModeled: 87, cvsAll: "0.72", cvsModeled: 0.6, cvsTarget: 0.85, allotment: 18000000, fee: 58000, performance: "below", segment: "Upper Mass" },
+  { id: 7, name: "Travel Insurance Bundle", sent: 195000, clicked: 4095, ctr: 2.1, ctrTarget: 1.8, transAll: 328, transModeled: 205, cvsAll: "1.28", cvsModeled: 1.05, cvsTarget: 0.75, allotment: 4200000, fee: 95000, performance: "above", segment: "First" },
+  { id: 8, name: "Investment Fund Q2", sent: 380000, clicked: 9880, ctr: 2.6, ctrTarget: 2.2, transAll: 790, transModeled: 494, cvsAll: "1.62", cvsModeled: 1.3, cvsTarget: 1.0, allotment: 22000000, fee: 285000, performance: "above", segment: "Wealth Potential" },
+  { id: 9, name: "Personal Loan Flash", sent: 420000, clicked: 7140, ctr: 1.7, ctrTarget: 2.4, transAll: 571, transModeled: 286, cvsAll: "0.85", cvsModeled: 0.68, cvsTarget: 1.1, allotment: 28000000, fee: 195000, performance: "below", segment: "Mass" },
+  { id: 10, name: "Premium Card Upgrade", sent: 85000, clicked: 2380, ctr: 2.8, ctrTarget: 2.5, transAll: 190, transModeled: 119, cvsAll: "1.75", cvsModeled: 1.4, cvsTarget: 1.2, allotment: 5500000, fee: 68000, performance: "above", segment: "Private" },
+  { id: 11, name: "Fixed Deposit 12M Special", sent: 290000, clicked: 7540, ctr: 2.6, ctrTarget: 2.3, transAll: 603, transModeled: 377, cvsAll: "1.58", cvsModeled: 1.3, cvsTarget: 1.05, allotment: 35000000, fee: 198000, performance: "above", segment: "Retiree" },
+  { id: 12, name: "Mutual Fund Promotion", sent: 345000, clicked: 7590, ctr: 2.2, ctrTarget: 2.1, transAll: 607, transModeled: 380, cvsAll: "1.35", cvsModeled: 1.1, cvsTarget: 0.95, allotment: 18500000, fee: 215000, performance: "on-track", segment: "First" },
+  { id: 13, name: "SME Business Loan", sent: 125000, clicked: 2000, ctr: 1.6, ctrTarget: 2.0, transAll: 160, transModeled: 80, cvsAll: "0.78", cvsModeled: 0.64, cvsTarget: 0.9, allotment: 45000000, fee: 52000, performance: "below", segment: "Upper Mass" },
+  { id: 14, name: "Mortgage Rate Lock", sent: 165000, clicked: 3630, ctr: 2.2, ctrTarget: 2.0, transAll: 290, transModeled: 182, cvsAll: "1.32", cvsModeled: 1.1, cvsTarget: 0.85, allotment: 32000000, fee: 98000, performance: "above", segment: "First" },
+  { id: 15, name: "Student Savings Account", sent: 180000, clicked: 3420, ctr: 1.9, ctrTarget: 1.8, transAll: 274, transModeled: 171, cvsAll: "1.12", cvsModeled: 0.95, cvsTarget: 0.8, allotment: 2800000, fee: 78000, performance: "on-track", segment: "Mass" },
+  { id: 16, name: "Retirement Planning", sent: 95000, clicked: 2375, ctr: 2.5, ctrTarget: 2.2, transAll: 190, transModeled: 119, cvsAll: "1.52", cvsModeled: 1.25, cvsTarget: 1.0, allotment: 15000000, fee: 62000, performance: "above", segment: "Retiree" },
+  { id: 17, name: "Gold Investment Fund", sent: 210000, clicked: 5040, ctr: 2.4, ctrTarget: 2.1, transAll: 403, transModeled: 252, cvsAll: "1.45", cvsModeled: 1.2, cvsTarget: 0.95, allotment: 12000000, fee: 138000, performance: "above", segment: "Wealth Potential" },
+  { id: 18, name: "Foreign Currency Promo", sent: 155000, clicked: 2945, ctr: 1.9, ctrTarget: 2.0, transAll: 236, transModeled: 147, cvsAll: "1.15", cvsModeled: 0.95, cvsTarget: 0.9, allotment: 8500000, fee: 82000, performance: "on-track", segment: "Prime" },
+  { id: 19, name: "Digital Banking Launch", sent: 450000, clicked: 11250, ctr: 2.5, ctrTarget: 2.3, transAll: 900, transModeled: 563, cvsAll: "1.55", cvsModeled: 1.25, cvsTarget: 1.05, allotment: 9800000, fee: 295000, performance: "on-track", segment: "Mass" },
+  { id: 20, name: "Mobile Pay Cashback", sent: 580000, clicked: 14500, ctr: 2.5, ctrTarget: 2.2, transAll: 1160, transModeled: 725, cvsAll: "1.58", cvsModeled: 1.25, cvsTarget: 1.0, allotment: 7200000, fee: 385000, performance: "above", segment: "Mass" },
+  ...Array.from({ length: 30 }, (_, i) => {
+    const idx = i + 21
+    const seed = idx * 1234
+    const ctrTarget = Number((seededRandom(seed) * 1.5 + 1.5).toFixed(2))
+    const ctr = Number((seededRandom(seed + 1) * 2 + 0.8).toFixed(2))
+    const cvsTarget = Number((seededRandom(seed + 2) * 0.8 + 0.4).toFixed(2))
+    const cvsModeled = Number((seededRandom(seed + 3) * 1.2 + 0.2).toFixed(2))
+    const sent = Math.floor(seededRandom(seed + 4) * 400000 + 100000)
+    const clicked = Math.floor(sent * ctr / 100)
+    let performance = "on-track"
+    if (ctr >= ctrTarget * 1.1) performance = "above"
+    if (ctr < ctrTarget * 0.8) performance = "below"
+    const names = [
+      "Insurance Bundling", "Wealth Management Intro", "Emergency Fund Campaign", "Tax Saving Investment",
+      "Education Loan Drive", "Senior Citizen FD", "NRI Account Opening", "Corporate Card Launch",
+      "Trade Finance Promo", "Green Bond Investment", "EV Loan Subsidy", "Healthcare Finance",
+      "Women Savings Plus", "First Home Buyer", "Agri Loan Season", "Festive Personal Loan",
+      "Balance Transfer Offer", "Stock Trading Promo", "Crypto Investment Info", "Real Estate Fund",
+      "Pension Plan Launch", "Child Education Plan", "Marriage Savings", "Vacation Loan",
+      "Home Improvement Loan", "Debt Consolidation", "Business Expansion", "Startup Funding Info",
+      "Export Finance", "Import Finance"
+    ]
+    const segments = ["Prime", "First", "Mass", "Upper Mass", "Wealth Potential", "Private", "Retiree"]
+    return {
+      id: idx,
+      name: names[i],
+      sent,
+      clicked,
+      ctr,
+      ctrTarget,
+      transAll: Math.floor(clicked * 0.08),
+      transModeled: Math.floor(clicked * 0.05),
+      cvsAll: (seededRandom(seed + 5) * 1.5 + 0.3).toFixed(2),
+      cvsModeled,
+      cvsTarget,
+      allotment: Math.floor(seededRandom(seed + 6) * 20000000 + 5000000),
+      fee: Math.floor(seededRandom(seed + 7) * 400000 + 50000),
+      performance,
+      segment: segments[Math.floor(seededRandom(seed + 8) * 7)],
+    }
+  })
 ]
 
-const conversionByChannel = [
-  { channel: "Mobile App", conversion: 5.2, volume: 45000 },
-  { channel: "Social Media", conversion: 3.8, volume: 38000 },
-  { channel: "LINE", conversion: 4.1, volume: 32000 },
-  { channel: "Email", conversion: 2.9, volume: 28000 },
-  { channel: "In-Branch", conversion: 6.8, volume: 15000 },
-  { channel: "Website", conversion: 3.2, volume: 25000 },
+// Click timeline data
+const clickTimeline = [
+  { time: "0h", actual: 2450, expected: 2200 },
+  { time: "1h", actual: 5890, expected: 5500 },
+  { time: "2h", actual: 8420, expected: 8200 },
+  { time: "3h", actual: 10250, expected: 10500 },
+  { time: "4h", actual: 11580, expected: 12200 },
+  { time: "5h", actual: 12320, expected: 13500 },
+  { time: "6h", actual: 12850, expected: 14200 },
 ]
 
-const trendPredictions = [
-  {
-    trend: "#SongkranSale",
-    currentVolume: 125000,
-    predictedPeak: 285000,
-    peakDate: "Apr 13",
-    confidence: 94,
-    recommendation: "Launch within 48 hours",
-  },
-  {
-    trend: "K-Pop Comeback",
-    currentVolume: 98000,
-    predictedPeak: 420000,
-    peakDate: "Apr 18",
-    confidence: 87,
-    recommendation: "Prepare campaign materials",
-  },
-  {
-    trend: "Summer Travel",
-    currentVolume: 76000,
-    predictedPeak: 180000,
-    peakDate: "May 5",
-    confidence: 82,
-    recommendation: "Early bird promotions",
-  },
-  {
-    trend: "AI Investment",
-    currentVolume: 87000,
-    predictedPeak: 156000,
-    peakDate: "Apr 25",
-    confidence: 78,
-    recommendation: "Target tech segment",
-  },
-]
+// Performance alerts
+const alerts = campaigns.filter(c => c.performance === "below").slice(0, 3).map(c => ({
+  id: c.id,
+  campaign: c.name,
+  issue: `CTR ${Math.round((1 - c.ctr / c.ctrTarget) * 100)}% below target`,
+  detail: `${c.ctr}% actual vs ${c.ctrTarget}% expected`,
+  action: "Consider resending to different segment or adjusting message",
+}))
 
-const campaignROI = [
-  { name: "Festival Promo", spent: 500000, revenue: 2100000, roi: 4.2 },
-  { name: "K-Pop Card", spent: 350000, revenue: 1400000, roi: 4.0 },
-  { name: "Travel Insurance", spent: 280000, revenue: 980000, roi: 3.5 },
-  { name: "Investment Bonus", spent: 420000, revenue: 1680000, roi: 4.0 },
-  { name: "Family Package", spent: 320000, revenue: 1120000, roi: 3.5 },
-]
-
-const segmentPerformance = [
-  { name: "Urban Millennials", value: 35, color: "hsl(var(--chart-1))" },
-  { name: "Gen Z", value: 25, color: "hsl(var(--chart-2))" },
-  { name: "Professionals", value: 20, color: "hsl(var(--chart-3))" },
-  { name: "Families", value: 12, color: "hsl(var(--chart-4))" },
-  { name: "Investors", value: 8, color: "hsl(var(--chart-5))" },
-]
-
-const historicalTrends = [
-  { date: "Week 1", actual: 3.2, predicted: 3.0 },
-  { date: "Week 2", actual: 3.5, predicted: 3.4 },
-  { date: "Week 3", actual: 3.8, predicted: 3.9 },
-  { date: "Week 4", actual: 4.1, predicted: 4.0 },
-  { date: "Week 5", actual: 4.3, predicted: 4.5 },
-  { date: "Week 6", actual: null, predicted: 4.8 },
-  { date: "Week 7", actual: null, predicted: 5.1 },
-  { date: "Week 8", actual: null, predicted: 5.3 },
-]
+const ITEMS_PER_PAGE = 10
 
 export default function AnalyticsPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const [sortField, setSortField] = useState<string>("name")
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedCampaign, setSelectedCampaign] = useState(campaigns[0])
+
+  // Filter and sort campaigns
+  const filteredCampaigns = useMemo(() => {
+    let result = [...campaigns]
+    
+    // Search filter
+    if (searchQuery) {
+      result = result.filter(c => 
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+    
+    // Status filter
+    if (statusFilter !== "all") {
+      result = result.filter(c => c.performance === statusFilter)
+    }
+    
+    // Sort
+    result.sort((a, b) => {
+      let aVal: any = a[sortField as keyof typeof a]
+      let bVal: any = b[sortField as keyof typeof b]
+      if (typeof aVal === "string") {
+        return sortDir === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal
+    })
+    
+    return result
+  }, [searchQuery, statusFilter, sortField, sortDir])
+
+  // Pagination
+  const totalPages = Math.ceil(filteredCampaigns.length / ITEMS_PER_PAGE)
+  const paginatedCampaigns = filteredCampaigns.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  // Summary stats
+  const totalSent = campaigns.reduce((sum, c) => sum + c.sent, 0)
+  const totalClicks = campaigns.reduce((sum, c) => sum + c.clicked, 0)
+  const avgCTR = (totalClicks / totalSent * 100).toFixed(2)
+  const totalTrans = campaigns.reduce((sum, c) => sum + c.transModeled, 0)
+
+  // Status counts
+  const aboveCount = campaigns.filter(c => c.performance === "above").length
+  const onTrackCount = campaigns.filter(c => c.performance === "on-track").length
+  const belowCount = campaigns.filter(c => c.performance === "below").length
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDir(sortDir === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortDir("asc")
+    }
+  }
+
   return (
     <DashboardLayout
-      title="Analytics & Predictions"
-      subtitle="Performance metrics and AI-powered forecasting"
+      title="Dashboard"
+      subtitle="Real-time performance monitoring"
     >
       <div className="space-y-6">
-        {/* Header Actions */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Select defaultValue="30d">
-              <SelectTrigger className="w-40">
-                <Calendar className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Time Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7d">Last 7 days</SelectItem>
-                <SelectItem value="30d">Last 30 days</SelectItem>
-                <SelectItem value="90d">Last 90 days</SelectItem>
-                <SelectItem value="1y">Last year</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2 rounded-full bg-green-100 px-3 py-1">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="text-sm font-medium text-green-700">Live</span>
+            </div>
+            <span className="text-sm text-muted-foreground">{campaigns.length} campaigns active</span>
           </div>
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Export Report
-          </Button>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            title="Total Conversions"
-            value="52,100"
-            change="+28.5%"
-            trend="up"
-            icon={Target}
-            subtitle="vs. last month"
-          />
-          <MetricCard
-            title="Campaign Revenue"
-            value="31.9M THB"
-            change="+35.2%"
-            trend="up"
-            icon={DollarSign}
-            subtitle="vs. last month"
-            highlight
-          />
-          <MetricCard
-            title="Avg. ROI"
-            value="3.8x"
-            change="+0.6x"
-            trend="up"
-            icon={TrendingUp}
-            subtitle="return on investment"
-          />
-          <MetricCard
-            title="Prediction Accuracy"
-            value="91.2%"
-            change="+2.4%"
-            trend="up"
-            icon={Activity}
-            subtitle="AI model performance"
-          />
+        {/* Alert Banner */}
+        {alerts.length > 0 && (
+          <Card className="border-orange-300 bg-orange-50">
+            <CardContent className="py-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 text-orange-600 shrink-0" />
+                <div className="flex-1">
+                  <p className="font-medium text-orange-800">
+                    {alerts.length} campaign{alerts.length > 1 ? "s" : ""} performing below target
+                  </p>
+                  <p className="mt-1 text-sm text-orange-700">
+                    {alerts[0].campaign}: {alerts[0].issue}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Benchmark Reference */}
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+          <CardContent className="py-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                  <Target className="h-4 w-4 text-primary" />
+                </div>
+                <span className="font-semibold text-foreground">Performance Benchmarks</span>
+              </div>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">0.3%</p>
+                  <p className="text-xs text-muted-foreground">CTR Target</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">0.6%</p>
+                  <p className="text-xs text-muted-foreground">CVS Target</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">80%</p>
+                  <p className="text-xs text-muted-foreground">6h Click Threshold</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Sent</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
+                    {(totalSent / 1000000).toFixed(1)}M
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                  <Send className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Clicks</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">
+                    {(totalClicks / 1000).toFixed(0)}K
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                  <MousePointer className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg CTR</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{avgCTR}%</p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                  <Target className="h-5 w-5 text-purple-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Transactions</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{totalTrans.toLocaleString()}</p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
+                  <DollarSign className="h-5 w-5 text-amber-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Analytics */}
-        <Tabs defaultValue="performance">
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="predictions">Predictions</TabsTrigger>
-            <TabsTrigger value="comparison">Historical</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="timeline">Click Timeline</TabsTrigger>
+            <TabsTrigger value="report">AI Report</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="performance" className="mt-6 space-y-6">
-            {/* Revenue & Conversions */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base font-medium">
-                    Monthly Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={monthlyPerformance}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                        <YAxis yAxisId="left" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                        <YAxis yAxisId="right" orientation="right" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--popover))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <Legend />
-                        <Bar yAxisId="left" dataKey="conversions" fill="hsl(var(--primary))" name="Conversions" radius={[4, 4, 0, 0]} />
-                        <Line yAxisId="right" type="monotone" dataKey="roi" stroke="hsl(var(--success))" strokeWidth={2} name="ROI (x)" dot={{ fill: "hsl(var(--success))" }} />
-                      </ComposedChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base font-medium">
-                    Conversion by Channel
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={conversionByChannel} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                        <YAxis dataKey="channel" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={90} />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "hsl(var(--popover))",
-                            border: "1px solid hsl(var(--border))",
-                            borderRadius: "8px",
-                          }}
-                        />
-                        <Bar dataKey="conversion" fill="hsl(var(--chart-2))" name="Conversion %" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Campaign ROI Table */}
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Filters and Search */}
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium">
-                  Campaign ROI Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  {/* Search */}
+                  <div className="relative w-full sm:w-80">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search campaigns..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value)
+                        setCurrentPage(1)
+                      }}
+                      className="pl-10"
+                    />
+                  </div>
+                  
+                  {/* Status Filters */}
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant={statusFilter === "all" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => { setStatusFilter("all"); setCurrentPage(1) }}
+                    >
+                      All ({campaigns.length})
+                    </Button>
+                    <Button
+                      variant={statusFilter === "above" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => { setStatusFilter("above"); setCurrentPage(1) }}
+                      className={statusFilter !== "above" ? "border-green-300 text-green-700 hover:bg-green-50" : "bg-green-600"}
+                    >
+                      Above ({aboveCount})
+                    </Button>
+                    <Button
+                      variant={statusFilter === "on-track" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => { setStatusFilter("on-track"); setCurrentPage(1) }}
+                      className={statusFilter !== "on-track" ? "border-blue-300 text-blue-700 hover:bg-blue-50" : "bg-blue-600"}
+                    >
+                      On Track ({onTrackCount})
+                    </Button>
+                    <Button
+                      variant={statusFilter === "below" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => { setStatusFilter("below"); setCurrentPage(1) }}
+                      className={statusFilter !== "below" ? "border-orange-300 text-orange-700 hover:bg-orange-50" : "bg-orange-600"}
+                    >
+                      Below ({belowCount})
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Campaign Table */}
+            <Card>
+              <CardContent className="pt-6">
                 <div className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-border">
-                        <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Campaign</th>
-                        <th className="pb-3 text-right text-sm font-medium text-muted-foreground">Spent</th>
-                        <th className="pb-3 text-right text-sm font-medium text-muted-foreground">Revenue</th>
-                        <th className="pb-3 text-right text-sm font-medium text-muted-foreground">ROI</th>
-                        <th className="pb-3 text-right text-sm font-medium text-muted-foreground">Performance</th>
+                      <tr className="border-b">
+                        <th 
+                          className="pb-3 text-left font-medium text-muted-foreground cursor-pointer hover:text-foreground"
+                          onClick={() => handleSort("name")}
+                        >
+                          <div className="flex items-center gap-1">
+                            Campaign
+                            <ArrowUpDown className="h-3 w-3" />
+                          </div>
+                        </th>
+                        <th className="pb-3 text-left font-medium text-muted-foreground">Status</th>
+                        <th className="pb-3 text-left font-medium text-muted-foreground">Segment</th>
+                        <th 
+                          className="pb-3 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground"
+                          onClick={() => handleSort("sent")}
+                        >
+                          <div className="flex items-center justify-end gap-1">
+                            Sent
+                            <ArrowUpDown className="h-3 w-3" />
+                          </div>
+                        </th>
+                        <th 
+                          className="pb-3 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground"
+                          onClick={() => handleSort("ctr")}
+                        >
+                          <div className="flex items-center justify-end gap-1">
+                            CTR
+                            <ArrowUpDown className="h-3 w-3" />
+                          </div>
+                        </th>
+                        <th 
+                          className="pb-3 text-right font-medium text-muted-foreground cursor-pointer hover:text-foreground"
+                          onClick={() => handleSort("cvsModeled")}
+                        >
+                          <div className="flex items-center justify-end gap-1">
+                            CVS
+                            <ArrowUpDown className="h-3 w-3" />
+                          </div>
+                        </th>
+                        <th className="pb-3 text-right font-medium text-muted-foreground">Trans</th>
+                        <th className="pb-3 text-right font-medium text-muted-foreground">Allotment</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {campaignROI.map((campaign) => (
-                        <tr key={campaign.name} className="border-b border-border/50">
-                          <td className="py-4 font-medium text-foreground">{campaign.name}</td>
-                          <td className="py-4 text-right text-muted-foreground">
-                            {(campaign.spent / 1000).toFixed(0)}K THB
+                      {paginatedCampaigns.map((c) => (
+                        <tr 
+                          key={c.id} 
+                          className="border-b border-border/50 cursor-pointer hover:bg-secondary/50 transition-colors"
+                          onClick={() => setSelectedCampaign(c)}
+                        >
+                          <td className="py-3 font-medium text-foreground max-w-[200px] truncate">
+                            {c.name}
                           </td>
-                          <td className="py-4 text-right text-foreground">
-                            {(campaign.revenue / 1000000).toFixed(1)}M THB
+                          <td className="py-3">
+                            <Badge 
+                              variant="secondary"
+                              className={
+                                c.performance === "above" 
+                                  ? "bg-green-100 text-green-700" 
+                                  : c.performance === "on-track"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-orange-100 text-orange-700"
+                              }
+                            >
+                              {c.performance === "above" ? "Above" : c.performance === "on-track" ? "On Track" : "Below"}
+                            </Badge>
                           </td>
-                          <td className="py-4 text-right font-semibold text-success">
-                            {campaign.roi}x
-                          </td>
-                          <td className="py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div className="h-2 w-24 rounded-full bg-secondary">
-                                <div
-                                  className="h-2 rounded-full bg-primary"
-                                  style={{ width: `${(campaign.roi / 5) * 100}%` }}
-                                />
-                              </div>
+                          <td className="py-3 text-muted-foreground">{c.segment}</td>
+                          <td className="py-3 text-right text-foreground">{(c.sent / 1000).toFixed(0)}K</td>
+                          <td className="py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <span className={c.ctr >= c.ctrTarget ? "text-green-600 font-medium" : "text-orange-600 font-medium"}>
+                                {c.ctr}%
+                              </span>
+                              {c.ctr >= c.ctrTarget ? (
+                                <ArrowUpRight className="h-3 w-3 text-green-500" />
+                              ) : (
+                                <ArrowDownRight className="h-3 w-3 text-orange-500" />
+                              )}
                             </div>
                           </td>
+                          <td className="py-3 text-right">
+                            <span className={c.cvsModeled >= c.cvsTarget ? "text-green-600 font-medium" : "text-orange-600 font-medium"}>
+                              {c.cvsModeled}%
+                            </span>
+                          </td>
+                          <td className="py-3 text-right text-foreground">{c.transModeled}</td>
+                          <td className="py-3 text-right text-foreground">{(c.allotment / 1000000).toFixed(1)}M</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+
+                {/* Pagination */}
+                <div className="mt-4 flex items-center justify-between border-t pt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredCampaigns.length)} of {filteredCampaigns.length} campaigns
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
+          
+          </TabsContent>
 
-            {/* Segment Distribution */}
-            <div className="grid gap-6 lg:grid-cols-2">
-              <Card>
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-4">
+              {/* Chart */}
+              <Card className="lg:col-span-3">
                 <CardHeader>
-                  <CardTitle className="text-base font-medium">
-                    Revenue by Segment
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">Click Accumulation (6-Hour Window)</CardTitle>
+                    <Badge variant="outline">80.69% threshold at 6h</Badge>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="h-[250px]">
+                  <div className="h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={segmentPerformance}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={90}
-                          paddingAngle={2}
-                          dataKey="value"
-                        >
-                          {segmentPerformance.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
+                      <AreaChart data={clickTimeline}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis 
+                          dataKey="time" 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          tickLine={false}
+                        />
+                        <YAxis 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          tickLine={false}
+                          tickFormatter={(v) => `${(v/1000).toFixed(0)}K`}
+                        />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: "hsl(var(--popover))",
+                            backgroundColor: "hsl(var(--card))",
                             border: "1px solid hsl(var(--border))",
                             borderRadius: "8px",
                           }}
+                          formatter={(value: number) => [`${value.toLocaleString()} clicks`, ""]}
                         />
-                      </PieChart>
+                        <Area 
+                          type="monotone" 
+                          dataKey="expected" 
+                          stroke="#94a3b8" 
+                          fill="#94a3b8"
+                          fillOpacity={0.15}
+                          strokeDasharray="5 5"
+                          strokeWidth={2}
+                          name="Expected"
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="actual" 
+                          stroke="#7c3aed" 
+                          fill="#7c3aed"
+                          fillOpacity={0.3}
+                          strokeWidth={2}
+                          name="Actual"
+                        />
+                      </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="mt-4 flex flex-wrap justify-center gap-4">
-                    {segmentPerformance.map((item) => (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <div
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {item.name}: {item.value}%
-                        </span>
-                      </div>
-                    ))}
+                  <div className="mt-4 flex justify-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#7c3aed" }} />
+                      <span className="text-sm text-muted-foreground">Actual Clicks</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#94a3b8" }} />
+                      <span className="text-sm text-muted-foreground">Expected Clicks</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Status Panel */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base font-medium">
-                    Top Performing Segments
-                  </CardTitle>
+                  <CardTitle className="text-base">6h Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { name: "Urban Millennials", revenue: "11.2M", growth: "+32%", conversion: "4.8%" },
-                    { name: "Gen Z Digital", revenue: "7.9M", growth: "+45%", conversion: "3.9%" },
-                    { name: "Tech Professionals", revenue: "6.4M", growth: "+28%", conversion: "5.2%" },
-                    { name: "Young Families", revenue: "3.8M", growth: "+18%", conversion: "4.1%" },
-                  ].map((segment, index) => (
-                    <div
-                      key={segment.name}
-                      className="flex items-center justify-between rounded-lg border border-border p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">{segment.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Conv. rate: {segment.conversion}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-foreground">{segment.revenue}</p>
-                        <p className="text-sm text-success">{segment.growth}</p>
-                      </div>
+                  <div className="rounded-lg bg-secondary p-4 text-center">
+                    <p className="text-xs text-muted-foreground">Expected</p>
+                    <p className="text-xl font-bold text-foreground">14,200</p>
+                  </div>
+                  <div className="rounded-lg bg-secondary p-4 text-center">
+                    <p className="text-xs text-muted-foreground">Actual</p>
+                    <p className="text-xl font-bold text-foreground">12,850</p>
+                  </div>
+                  <div className="rounded-lg border-2 border-orange-300 bg-orange-50 p-4 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-orange-600" />
+                      <p className="font-medium text-orange-700">Below Target</p>
                     </div>
-                  ))}
+                    <p className="mt-1 text-sm text-orange-600">-9.5% variance</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="predictions" className="mt-6 space-y-6">
-            {/* Trend Predictions */}
+          
+
+          {/* AI Report Tab */}
+          <TabsContent value="report" className="space-y-6">
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-primary" />
-                  <CardTitle className="text-base font-medium">
-                    AI Trend Predictions
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <FileText className="h-5 w-5" />
+                    AI Performance Summary
                   </CardTitle>
+                  <Badge variant="outline">Generated today at 09:00</Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {trendPredictions.map((prediction) => (
-                    <div
-                      key={prediction.trend}
-                      className="rounded-lg border border-border p-4"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <Badge variant="secondary" className="bg-primary/10 text-primary">
-                            {prediction.trend}
-                          </Badge>
-                          <div className="mt-3 grid grid-cols-2 gap-4">
-                            <div>
-                              <p className="text-xs text-muted-foreground">Current</p>
-                              <p className="font-semibold text-foreground">
-                                {(prediction.currentVolume / 1000).toFixed(0)}K
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-muted-foreground">Predicted Peak</p>
-                              <p className="font-semibold text-success">
-                                {(prediction.predictedPeak / 1000).toFixed(0)}K
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1">
-                            <Activity className="h-4 w-4 text-primary" />
-                            <span className="text-sm font-medium text-primary">
-                              {prediction.confidence}%
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">confidence</p>
-                        </div>
-                      </div>
-                      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>Peak: {prediction.peakDate}</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">
-                          {prediction.recommendation}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+              <CardContent className="prose prose-sm max-w-none">
+  <div className="rounded-lg bg-secondary/50 p-4 space-y-4">
 
-            {/* Prediction vs Actual */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium">
-                  Prediction Accuracy Over Time
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={historicalTrends}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} domain={[2, 6]} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--popover))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="actual"
-                        stroke="hsl(var(--chart-2))"
-                        strokeWidth={2}
-                        dot={{ fill: "hsl(var(--chart-2))" }}
-                        name="Actual"
-                        connectNulls={false}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="predicted"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        strokeDasharray="5 5"
-                        dot={{ fill: "hsl(var(--primary))" }}
-                        name="Predicted"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-4 rounded-lg bg-secondary/50 p-4">
-                  <p className="text-sm text-foreground">
-                    <strong>AI Forecast:</strong> Based on current trends and historical data, we predict a 
-                    <span className="font-semibold text-success"> 5.3% conversion rate </span>
-                    by Week 8. Confidence interval: 4.9% - 5.7%.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+    {/* Top Performers */}
+    <div>
+      <h4 className="font-semibold text-foreground">Top Performers</h4>
+      <p className="text-muted-foreground">
+        {campaigns.filter(c => c.performance === "above").length} campaigns are outperforming their targets.
+        The top-performing campaign is driving a strong {campaigns[0].ctr}% CTR, significantly exceeding the 0.27% benchmark.
+        High-performing campaigns are primarily concentrated in investment and savings products, indicating strong customer interest in wealth-building opportunities.
+      </p>
+    </div>
 
-          <TabsContent value="comparison" className="mt-6 space-y-6">
-            {/* Historical Comparison */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base font-medium">
-                  Year-over-Year Comparison
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={[
-                        { month: "Jan", thisYear: 4500, lastYear: 3200 },
-                        { month: "Feb", thisYear: 5200, lastYear: 3800 },
-                        { month: "Mar", thisYear: 6800, lastYear: 4500 },
-                        { month: "Apr", thisYear: 8900, lastYear: 5200 },
-                        { month: "May", thisYear: 11200, lastYear: 6800 },
-                        { month: "Jun", thisYear: 14500, lastYear: 8200 },
-                      ]}
-                    >
-                      <defs>
-                        <linearGradient id="thisYearGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="lastYearGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--muted))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--muted))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--popover))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                        }}
-                      />
-                      <Legend />
-                      <Area
-                        type="monotone"
-                        dataKey="lastYear"
-                        stroke="hsl(var(--muted))"
-                        strokeWidth={2}
-                        fill="url(#lastYearGradient)"
-                        name="2025"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="thisYear"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth={2}
-                        fill="url(#thisYearGradient)"
-                        name="2026"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+    {/* Attention Required */}
+    <div>
+      <h4 className="font-semibold text-foreground">Attention Required</h4>
+      <p className="text-muted-foreground">
+        {campaigns.filter(c => c.performance === "below").length} campaigns are underperforming against expectations.
+        Several campaigns show low CTR despite high reach, suggesting suboptimal targeting or message relevance.
+        Immediate optimization is recommended for campaigns falling below the CTR threshold to improve engagement and conversion outcomes.
+      </p>
+    </div>
 
-            {/* Comparison Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Conversions</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">52.1K</p>
-                      <div className="mt-2 flex items-center gap-1">
-                        <ArrowUpRight className="h-4 w-4 text-success" />
-                        <span className="text-sm text-success">+76.8% vs 2025</span>
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-success/10 p-3">
-                      <TrendingUp className="h-6 w-6 text-success" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Avg. Campaign ROI</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">3.8x</p>
-                      <div className="mt-2 flex items-center gap-1">
-                        <ArrowUpRight className="h-4 w-4 text-success" />
-                        <span className="text-sm text-success">+1.2x vs 2025</span>
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-primary/10 p-3">
-                      <BarChart3 className="h-6 w-6 text-primary" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Customer Reach</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">4.2M</p>
-                      <div className="mt-2 flex items-center gap-1">
-                        <ArrowUpRight className="h-4 w-4 text-success" />
-                        <span className="text-sm text-success">+45.2% vs 2025</span>
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-chart-2/10 p-3">
-                      <Users className="h-6 w-6 text-chart-2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+    {/* Recommendation */}
+    <div>
+      <h4 className="font-semibold text-foreground">Recommendation</h4>
+      <p className="text-muted-foreground">
+        Based on current performance trends and market signals, investment and savings campaigns are gaining strong momentum.
+        Consider reallocating budget from underperforming loan campaigns to higher-performing segments such as Prime and Wealth Potential.
+        Additionally, refine targeting and refresh creatives for low-performing campaigns to better align with current customer preferences.
+      </p>
+    </div>
+
+  </div>
+</CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
-  )
-}
-
-interface MetricCardProps {
-  title: string
-  value: string
-  change: string
-  trend: "up" | "down"
-  icon: React.ElementType
-  subtitle: string
-  highlight?: boolean
-}
-
-function MetricCard({ title, value, change, trend, icon: Icon, subtitle, highlight }: MetricCardProps) {
-  return (
-    <Card className={highlight ? "border-primary/50 bg-primary/5" : ""}>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
-            <div className="mt-1 flex items-center gap-1">
-              {trend === "up" ? (
-                <ArrowUpRight className="h-4 w-4 text-success" />
-              ) : (
-                <ArrowDownRight className="h-4 w-4 text-destructive" />
-              )}
-              <span className={trend === "up" ? "text-sm text-success" : "text-sm text-destructive"}>
-                {change}
-              </span>
-              <span className="text-xs text-muted-foreground">{subtitle}</span>
-            </div>
-          </div>
-          <div className={`rounded-lg p-3 ${highlight ? "bg-primary/20" : "bg-secondary"}`}>
-            <Icon className={`h-5 w-5 ${highlight ? "text-primary" : "text-muted-foreground"}`} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   )
 }

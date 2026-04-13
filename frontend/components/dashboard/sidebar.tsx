@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
@@ -9,43 +10,62 @@ import {
   Users,
   BarChart3,
   Settings,
-  Zap,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
 const navigation = [
-  { name: "Trend Feed", href: "/", icon: TrendingUp },
-  { name: "AI Recommendations", href: "/recommendations", icon: Sparkles },
-  { name: "Target Groups", href: "/targets", icon: Users },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Trending News", href: "/trending-news", icon: TrendingUp },
+  { name: "AI Recommendation", href: "/recommendations", icon: Sparkles },
+  { name: "Target Group", href: "/targets", icon: Users },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  collapsed: boolean
+  setCollapsed: (collapsed: boolean) => void
+  mobileOpen: boolean
+  setMobileOpen: (open: boolean) => void
+}
+
+export function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobileOpen }: SidebarProps) {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
 
   return (
     <aside
       className={cn(
-        "flex flex-col border-r border-border bg-sidebar transition-all duration-300",
+        "fixed inset-y-0 left-0 z-40 flex flex-col border-r border-border bg-sidebar transition-all duration-300 lg:relative",
+        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         collapsed ? "w-16" : "w-64"
       )}
     >
       <div className="flex h-16 items-center justify-between border-b border-border px-4">
         {!collapsed && (
           <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
+              <Image
+                src="/images/mana-logo.png"
+                alt="Mana logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-cover"
+                priority
+              />
             </div>
-            <span className="font-semibold text-foreground">TrendPulse</span>
+            <span className="font-semibold text-foreground">Mana</span>
           </Link>
         )}
         {collapsed && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary mx-auto">
-            <Zap className="h-5 w-5 text-primary-foreground" />
+          <div className="mx-auto flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
+            <Image
+              src="/images/mana-logo.png"
+              alt="Mana logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-cover"
+              priority
+            />
           </div>
         )}
       </div>
@@ -57,6 +77,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={() => setMobileOpen(false)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
@@ -75,6 +96,7 @@ export function Sidebar() {
       <div className="border-t border-border p-3">
         <Link
           href="/settings"
+          onClick={() => setMobileOpen(false)}
           className={cn(
             "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
             collapsed && "justify-center px-2"
@@ -99,6 +121,15 @@ export function Sidebar() {
           )}
         </Button>
       </div>
+
+      {mobileOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 -z-10 bg-black/40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close sidebar"
+        />
+      )}
     </aside>
   )
 }

@@ -19,148 +19,157 @@ import {
   Search,
   Filter,
   TrendingUp,
-  MapPin,
   Briefcase,
   CreditCard,
   ShoppingBag,
-  Smartphone,
   Heart,
   Sparkles,
   ChevronRight,
   Star,
 } from "lucide-react"
 import Link from "next/link"
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  ScatterChart,
-  Scatter,
-  ZAxis,
-} from "recharts"
+
 
 const targetSegments = [
   {
     id: 1,
-    name: "Urban Millennials",
-    ageRange: "25-35",
-    size: 2400000,
-    avgIncome: 45000,
-    engagementScore: 92,
-    conversionPotential: 4.2,
-    topInterests: ["Technology", "Travel", "Food & Dining", "Entertainment"],
-    location: "Bangkok, Chiang Mai, Phuket",
-    preferredChannels: ["Mobile App", "Social Media", "LINE"],
-    productAffinity: ["Credit Cards", "Investments", "Travel Insurance"],
+    name: "Private",
+    size: 85000,
+    avgIncome: 500000,
+    engagementScore: 72,
+    conversionPotential: 8.5,
+    topInterests: ["Wealth Management", "Real Estate", "Luxury Travel", "Golf"],
+    location: "Bangkok CBD, Sathorn, Sukhumvit",
+    preferredChannels: ["Relationship Manager", "Private App", "Email"],
+    productAffinity: ["Private Banking", "Family Office", "Exclusive Investments"],
     trendAlignment: [
-      { trend: "#SongkranSale", score: 95 },
-      { trend: "K-Pop Comeback", score: 78 },
-      { trend: "Summer Travel", score: 88 },
+      { trend: "AI Investment", score: 92 },
+      { trend: "Luxury Travel", score: 88 },
+      { trend: "Real Estate", score: 95 },
     ],
   },
   {
     id: 2,
-    name: "Gen Z Digital Natives",
-    ageRange: "18-24",
-    size: 1800000,
-    avgIncome: 25000,
-    engagementScore: 88,
-    conversionPotential: 3.5,
-    topInterests: ["Gaming", "Music", "Fashion", "Social Media"],
-    location: "Bangkok, University Towns",
-    preferredChannels: ["TikTok", "Instagram", "Mobile App"],
-    productAffinity: ["Savings Accounts", "Debit Cards", "E-Wallet"],
+    name: "First",
+    size: 320000,
+    avgIncome: 250000,
+    engagementScore: 78,
+    conversionPotential: 7.2,
+    topInterests: ["Investments", "Travel", "Fine Dining", "Business"],
+    location: "Bangkok, Major Cities",
+    preferredChannels: ["Priority Banking", "Mobile App", "Email"],
+    productAffinity: ["Priority Wealth", "Premium Cards", "Investment Funds"],
     trendAlignment: [
-      { trend: "K-Pop Comeback", score: 98 },
-      { trend: "#SongkranSale", score: 72 },
-      { trend: "AI Investment", score: 45 },
+      { trend: "AI Investment", score: 94 },
+      { trend: "Summer Travel", score: 82 },
+      { trend: "EV Subsidies", score: 76 },
     ],
   },
   {
     id: 3,
-    name: "Tech-Savvy Professionals",
-    ageRange: "30-45",
-    size: 1500000,
-    avgIncome: 85000,
-    engagementScore: 78,
-    conversionPotential: 5.8,
-    topInterests: ["Technology", "Investments", "Career Growth", "Gadgets"],
-    location: "Bangkok, Tech Hubs",
-    preferredChannels: ["Email", "LinkedIn", "Mobile App"],
+    name: "Prime",
+    size: 890000,
+    avgIncome: 120000,
+    engagementScore: 82,
+    conversionPotential: 6.1,
+    topInterests: ["Technology", "Investments", "Travel", "Lifestyle"],
+    location: "Bangkok, Regional Capitals",
+    preferredChannels: ["Mobile App", "Email", "LINE"],
     productAffinity: ["Wealth Management", "Credit Cards", "Insurance"],
     trendAlignment: [
-      { trend: "AI Investment", score: 96 },
-      { trend: "EV Subsidies", score: 82 },
-      { trend: "Summer Travel", score: 68 },
+      { trend: "AI Investment", score: 88 },
+      { trend: "#SongkranSale", score: 85 },
+      { trend: "Summer Travel", score: 80 },
     ],
   },
   {
     id: 4,
-    name: "Young Families",
-    ageRange: "28-40",
-    size: 1200000,
-    avgIncome: 65000,
-    engagementScore: 72,
-    conversionPotential: 4.5,
-    topInterests: ["Family Activities", "Education", "Home & Living", "Health"],
-    location: "Suburban Bangkok, Regional Cities",
-    preferredChannels: ["Facebook", "LINE", "Email"],
-    productAffinity: ["Home Loans", "Education Savings", "Family Insurance"],
+    name: "Wealth Potential",
+    size: 1500000,
+    avgIncome: 75000,
+    engagementScore: 88,
+    conversionPotential: 5.4,
+    topInterests: ["Career Growth", "Technology", "Travel", "Investments"],
+    location: "Bangkok, Tech Hubs, Business Districts",
+    preferredChannels: ["Mobile App", "Social Media", "LINE"],
+    productAffinity: ["Investment Funds", "Credit Cards", "Savings"],
     trendAlignment: [
-      { trend: "Summer Travel", score: 92 },
-      { trend: "#SongkranSale", score: 85 },
-      { trend: "EV Subsidies", score: 78 },
+      { trend: "#SongkranSale", score: 92 },
+      { trend: "K-Pop Comeback", score: 75 },
+      { trend: "AI Investment", score: 84 },
     ],
   },
   {
     id: 5,
-    name: "Active Investors",
-    ageRange: "35-55",
-    size: 890000,
-    avgIncome: 120000,
-    engagementScore: 65,
-    conversionPotential: 6.2,
-    topInterests: ["Stock Market", "Real Estate", "Crypto", "Business"],
-    location: "Bangkok CBD, Financial Districts",
-    preferredChannels: ["Email", "Mobile App", "Direct Call"],
-    productAffinity: ["Wealth Management", "Investment Funds", "Premium Cards"],
+    name: "Upper Mass",
+    size: 2400000,
+    avgIncome: 45000,
+    engagementScore: 85,
+    conversionPotential: 4.2,
+    topInterests: ["Shopping", "Entertainment", "Food & Dining", "Travel"],
+    location: "Bangkok, Major Cities",
+    preferredChannels: ["Mobile App", "Social Media", "LINE", "TikTok"],
+    productAffinity: ["Credit Cards", "Personal Loans", "Savings Accounts"],
     trendAlignment: [
-      { trend: "AI Investment", score: 98 },
-      { trend: "EV Subsidies", score: 75 },
-      { trend: "Crypto Regulation", score: 88 },
+      { trend: "#SongkranSale", score: 95 },
+      { trend: "K-Pop Comeback", score: 88 },
+      { trend: "Summer Travel", score: 78 },
+    ],
+  },
+  {
+    id: 6,
+    name: "Mass",
+    size: 3800000,
+    avgIncome: 28000,
+    engagementScore: 78,
+    conversionPotential: 3.2,
+    topInterests: ["Shopping", "Entertainment", "Daily Deals", "Social Media"],
+    location: "Nationwide",
+    preferredChannels: ["Mobile App", "LINE", "SMS"],
+    productAffinity: ["Savings Accounts", "Debit Cards", "Personal Loans"],
+    trendAlignment: [
+      { trend: "#SongkranSale", score: 98 },
+      { trend: "K-Pop Comeback", score: 82 },
+      { trend: "Daily Deals", score: 90 },
+    ],
+  },
+  {
+    id: 7,
+    name: "Lower Mass",
+    size: 2100000,
+    avgIncome: 18000,
+    engagementScore: 65,
+    conversionPotential: 2.4,
+    topInterests: ["Savings", "Daily Deals", "Basic Banking", "Mobile Top-up"],
+    location: "Regional Areas, Rural",
+    preferredChannels: ["SMS", "LINE", "Branch"],
+    productAffinity: ["Savings Accounts", "Basic Insurance", "Micro Loans"],
+    trendAlignment: [
+      { trend: "#SongkranSale", score: 85 },
+      { trend: "Daily Deals", score: 92 },
+      { trend: "Government Subsidies", score: 88 },
+    ],
+  },
+  {
+    id: 8,
+    name: "Retiree",
+    size: 1200000,
+    avgIncome: 35000,
+    engagementScore: 58,
+    conversionPotential: 3.8,
+    topInterests: ["Health", "Travel", "Family", "Savings"],
+    location: "Bangkok, Provincial Cities",
+    preferredChannels: ["Branch", "Call Center", "LINE"],
+    productAffinity: ["Fixed Deposits", "Health Insurance", "Estate Planning"],
+    trendAlignment: [
+      { trend: "Health & Wellness", score: 95 },
+      { trend: "Summer Travel", score: 72 },
+      { trend: "Government Benefits", score: 88 },
     ],
   },
 ]
 
-const demographicData = [
-  { age: "18-24", male: 320, female: 380 },
-  { age: "25-34", male: 480, female: 520 },
-  { age: "35-44", male: 350, female: 380 },
-  { age: "45-54", male: 280, female: 310 },
-  { age: "55+", male: 180, female: 220 },
-]
 
-const incomeDistribution = [
-  { name: "< 25K", value: 18, color: "hsl(var(--chart-5))" },
-  { name: "25K-50K", value: 32, color: "hsl(var(--chart-4))" },
-  { name: "50K-85K", value: 28, color: "hsl(var(--chart-3))" },
-  { name: "85K-120K", value: 15, color: "hsl(var(--chart-2))" },
-  { name: "> 120K", value: 7, color: "hsl(var(--chart-1))" },
-]
-
-const segmentScatter = targetSegments.map((seg) => ({
-  name: seg.name,
-  engagement: seg.engagementScore,
-  conversion: seg.conversionPotential,
-  size: seg.size / 100000,
-}))
 
 export default function TargetsPage() {
   const [selectedSegment, setSelectedSegment] = useState(targetSegments[0])
@@ -279,9 +288,6 @@ export default function TargetsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-medium text-foreground">{segment.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Age: {segment.ageRange}
-                      </p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" />
                   </div>
@@ -312,14 +318,9 @@ export default function TargetsPage() {
                 <div>
                   <CardTitle className="text-xl">{selectedSegment.name}</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    {(selectedSegment.size / 1000000).toFixed(2)}M customers | Age: {selectedSegment.ageRange}
+                    {(selectedSegment.size / 1000000).toFixed(2)}M customers
                   </p>
                 </div>
-                <Link href="/recommendations">
-                  <Button size="sm">
-                    View AI Recommendations <Sparkles className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -382,28 +383,7 @@ export default function TargetsPage() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <h4 className="flex items-center gap-2 font-medium text-foreground">
-                    <MapPin className="h-4 w-4 text-chart-4" />
-                    Primary Locations
-                  </h4>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {selectedSegment.location}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="flex items-center gap-2 font-medium text-foreground">
-                    <Smartphone className="h-4 w-4 text-chart-2" />
-                    Preferred Channels
-                  </h4>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedSegment.preferredChannels.map((channel) => (
-                      <Badge key={channel} variant="secondary" className="bg-chart-2/10 text-chart-2">
-                        {channel}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                
               </div>
 
               {/* Trend Alignment */}
@@ -430,154 +410,7 @@ export default function TargetsPage() {
           </Card>
         </div>
 
-        {/* Analytics Section */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Demographics Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-medium">
-                Age & Gender Distribution
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={demographicData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                    <YAxis dataKey="age" type="category" stroke="hsl(var(--muted-foreground))" fontSize={12} width={50} />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar dataKey="male" fill="hsl(var(--chart-1))" name="Male" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="female" fill="hsl(var(--chart-4))" name="Female" radius={[0, 4, 4, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 flex justify-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full bg-chart-1" />
-                  <span className="text-sm text-muted-foreground">Male</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full bg-chart-4" />
-                  <span className="text-sm text-muted-foreground">Female</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Income Distribution */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base font-medium">
-                Income Distribution (Monthly THB)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[280px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={incomeDistribution}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {incomeDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-4">
-                {incomeDistribution.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {item.name}: {item.value}%
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Segment Scatter Plot */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-base font-medium">
-                Segment Performance Matrix
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ScatterChart>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis
-                      type="number"
-                      dataKey="engagement"
-                      name="Engagement"
-                      unit="%"
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      label={{ value: "Engagement Score (%)", position: "bottom", offset: -5 }}
-                    />
-                    <YAxis
-                      type="number"
-                      dataKey="conversion"
-                      name="Conversion"
-                      unit="%"
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={12}
-                      label={{ value: "Conversion Potential (%)", angle: -90, position: "insideLeft" }}
-                    />
-                    <ZAxis type="number" dataKey="size" range={[100, 1000]} />
-                    <Tooltip
-                      cursor={{ strokeDasharray: "3 3" }}
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--popover))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                      formatter={(value: number, name: string) => {
-                        if (name === "size") return [`${(value * 100000).toLocaleString()}`, "Size"]
-                        return [value, name]
-                      }}
-                    />
-                    <Scatter
-                      name="Segments"
-                      data={segmentScatter}
-                      fill="hsl(var(--primary))"
-                    />
-                  </ScatterChart>
-                </ResponsiveContainer>
-              </div>
-              <p className="mt-4 text-center text-sm text-muted-foreground">
-                Bubble size represents segment population. Top-right quadrant indicates high-value segments.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </DashboardLayout>
   )

@@ -14,8 +14,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'TrendPulse AI | SCB Campaign Intelligence',
-  description: 'AI-driven trend simulation platform for real-time campaign optimization',
+  title: 'Mana',
+  description: 'AI-driven trend analysis platform for real-time campaign recommendations',
 }
 
 export default function RootLayout({
