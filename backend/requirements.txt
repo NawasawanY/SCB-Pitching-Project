@@ -8,3 +8,6 @@ python-dotenv
 feedparser
 beautifulsoup4
 requests
+faiss-cpu
+langchain-community
+sentence-transformers

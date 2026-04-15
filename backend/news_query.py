@@ -3,72 +3,69 @@ import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict
 import datetime
+import json
+import os
 
-class NewsFetcher:
-    """
-    Fetch real financial news from SET, Thairath, and Bangkok Post.
-    Using RSS feeds where available and simple scraping for SET.
-    """
-    
-    SOURCES = {
-        "Bangkok Post": "https://www.bangkokpost.com/rss/business.xml",
-        "Thairath": "https://www.thairath.co.th/rss/business",
-    }
-    
-    SET_NEWS_URL = "https://www.set.or.th/en/market/news/news-today"
+class NewsStore:
+    """Handles persistent storage of news articles."""
+    FILE_PATH = "news_database.json"
 
     @classmethod
-    def get_latest_news(cls, limit: int = 5) -> List[Dict[str, str]]:
-        all_news = []
+    def save(cls, news_list: List[Dict]):
+        # Load existing
+        existing = cls.load()
+        existing_urls = {n['url'] for n in existing}
         
-        # 1. Fetch from RSS (Bangkok Post, Thairath)
-        for source_name, rss_url in cls.SOURCES.items():
+        # Add new (avoid duplicates)
+        new_count = 0
+        for news in news_list:
+            if news['url'] not in existing_urls:
+                existing.append(news)
+                new_count += 1
+        
+        # Keep only latest 100 for performance
+        existing = sorted(existing, key=lambda x: x.get('published', ''), reverse=True)[:100]
+        
+        with open(cls.FILE_PATH, "w", encoding="utf-8") as f:
+            json.dump(existing, f, ensure_ascii=False, indent=2)
+        return new_count
+
+    @classmethod
+    def load(cls) -> List[Dict]:
+        if not os.path.exists(cls.FILE_PATH):
+            return []
+        with open(cls.FILE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+class NewsFetcher:
+    SOURCES = {
+        "Bangkok Post Business": "https://www.bangkokpost.com/rss/business.xml",
+        "Thairath Business": "https://www.thairath.co.th/rss/business",
+        "Prachachat": "https://www.prachachat.net/category/finance/feed",
+    }
+
+    @classmethod
+    def get_50_news(cls):
+        all_news = []
+        for name, url in cls.SOURCES.items():
             try:
-                feed = feedparser.parse(rss_url)
-                for entry in feed.entries[:limit]:
+                feed = feedparser.parse(url)
+                for entry in feed.entries:
                     all_news.append({
                         "headline": entry.title,
                         "summary": entry.summary if hasattr(entry, 'summary') else entry.title,
-                        "source": source_name,
+                        "source": name,
                         "url": entry.link,
-                        "published": entry.published if hasattr(entry, 'published') else datetime.datetime.now().isoformat()
+                        "published": entry.published if hasattr(entry, 'published') else datetime.datetime.now().isoformat(),
+                        "timestamp": datetime.datetime.now().isoformat()
                     })
             except Exception as e:
-                print(f"Error fetching from {source_name}: {e}")
-
-        # 2. Fetch from SET (Scraping today's news)
-        try:
-            # Note: SET website might have anti-scraping or dynamic content.
-            # For a prototype, we'll try to fetch the main news page.
-            headers = {'User-Agent': 'Mozilla/5.0'}
-            response = requests.get(cls.SET_NEWS_URL, headers=headers, timeout=10)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                # SET news entries are usually in tables or specific div classes
-                # This is a generic attempt to find links that look like news
-                # Specific selectors for SET: div.news-item or similar
-                news_items = soup.find_all('div', class_='news-item') or soup.find_all('a', href=True)
-                count = 0
-                for item in news_items:
-                    if count >= limit: break
-                    text = item.get_text(strip=True)
-                    href = item.get('href')
-                    if href and '/news/' in href and len(text) > 30:
-                        all_news.append({
-                            "headline": text,
-                            "summary": text, # SET summary often requires clicking through
-                            "source": "SET Announcements",
-                            "url": f"https://www.set.or.th{href}" if href.startswith('/') else href,
-                            "published": datetime.datetime.now().isoformat()
-                        })
-                        count += 1
-        except Exception as e:
-            print(f"Error fetching from SET: {e}")
-
-        return all_news
+                print(f"Error {name}: {e}")
+        
+        return all_news[:50]
 
 if __name__ == "__main__":
-    # Test fetcher
-    news = NewsFetcher.get_latest_news(limit=2)
-    for n in news:
-        print(f"[{n['source']}] {n['headline'][:50]}...")
+    fetcher = NewsFetcher()
+    news = fetcher.get_50_news()
+    added = NewsStore.save(news)
+    print(f"Fetched {len(news)} articles. Added {added} new ones to database.")
