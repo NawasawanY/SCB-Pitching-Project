@@ -11,11 +11,15 @@ from langgraph.graph import StateGraph, END
 
 # Import refactored models and fetcher
 from models import (
-    NewsArticle, Campaign, Predictions, 
-    CampaignRecommendation, TargetGroup, 
-    ImpactEnum, SentimentEnum, UrgencyEnum
+    NewsArticle, Campaign, Predictions,
+    CampaignRecommendation, TargetGroup,
+    ImpactEnum, SentimentEnum, UrgencyEnum,
+    TrendRadarResponse, SignalMapResponse, TrendCampaign,
 )
 from news_query import NewsFetcher, NewsStore
+from trend_engine import detect_trends
+from signal_map import build_signal_map
+from campaign_engine import generate_campaign_from_trend, generate_all_campaigns
 
 load_dotenv()
 
@@ -247,6 +251,73 @@ async def generate_campaign(news_input: Dict[str, str]):
     )
     
     return recommendation
+
+# ── Trend Radar Endpoints ────────────────────────────────────────────────────
+
+@app.get("/api/trend-radar")
+async def get_trend_radar(window_days: int = 7):
+    """
+    Semantic clustering of news articles → detect emerging trends.
+    Uses embeddings + DBSCAN + LLM trend naming.
+    """
+    try:
+        result = detect_trends(window_days=window_days)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Signal Map Endpoints ─────────────────────────────────────────────────────
+
+@app.get("/api/signal-map")
+async def get_signal_map(use_llm: bool = False, min_weight: float = 1.0):
+    """
+    Entity co-occurrence graph from all stored news.
+    Returns D3.js-compatible { nodes, links } for force-directed visualization.
+    ?use_llm=true for richer entity extraction (slower, costs ~$0.01 total).
+    """
+    try:
+        result = build_signal_map(use_llm=use_llm, min_weight=min_weight)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── Campaign Engine Endpoints ────────────────────────────────────────────────
+
+@app.post("/api/trend-campaign")
+async def generate_trend_campaign(trend: Dict[str, Any]):
+    """
+    Given a trend object (from /api/trend-radar), generate a full campaign:
+    brief, segment ranking, LINE message draft.
+    """
+    try:
+        campaign = generate_campaign_from_trend(trend)
+        return campaign
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/auto-campaigns")
+async def auto_generate_campaigns(top_n: int = 3, window_days: int = 7):
+    """
+    Full pipeline: detect trends → generate campaigns for top-N trends.
+    This is the "money shot" endpoint for the demo.
+    """
+    try:
+        trend_result = detect_trends(window_days=window_days)
+        trends = trend_result.get("trends", [])
+        if not trends:
+            return {"campaigns": [], "message": "No trends detected"}
+        campaigns = generate_all_campaigns(trends, top_n=top_n)
+        return {
+            "campaigns": campaigns,
+            "trend_count": len(trends),
+            "article_count": trend_result.get("article_count", 0),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn

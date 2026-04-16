@@ -59,3 +59,77 @@ class CampaignRecommendation(BaseModel):
     targetGroup: TargetGroup
     predictions: Predictions
     reasoning: List[str]
+
+
+# ── Trend Radar models ───────────────────────────────────────────────────────
+
+class TrendItem(BaseModel):
+    trend_name: str = ""
+    trend_name_en: str = ""
+    summary: str = ""
+    confidence: float = 0.0
+    scb_products: List[str] = []
+    category: str = "other"
+    cluster_size: int = 0
+    growth_ratio: float = 0.0
+    emerging: bool = False
+    headlines: List[str] = []
+
+class TrendRadarResponse(BaseModel):
+    trends: List[TrendItem]
+    article_count: int
+    cluster_count: int = 0
+
+
+# ── Signal Map models ────────────────────────────────────────────────────────
+
+class GraphNode(BaseModel):
+    id: str
+    type: str
+    count: int
+
+class GraphLink(BaseModel):
+    source: str
+    target: str
+    weight: float
+
+class SignalMapResponse(BaseModel):
+    nodes: List[GraphNode]
+    links: List[GraphLink]
+    article_count: int
+    entity_count: int
+    edge_count: int
+
+
+# ── Campaign Engine models ───────────────────────────────────────────────────
+
+class LineMessage(BaseModel):
+    title: str = ""
+    body: str = ""
+    cta_text: str = ""
+    cta_url: str = ""
+
+class SegmentMatch(BaseModel):
+    segment_name: str
+    match_score: int = 0
+    predicted_ctr: float = 0.0
+    predicted_cvs: float = 0.0
+    reasoning: str = ""
+
+class SourceTrend(BaseModel):
+    name: str = ""
+    confidence: float = 0.0
+    category: str = "other"
+    cluster_size: int = 0
+    emerging: bool = False
+
+class TrendCampaign(BaseModel):
+    campaign_name: str = ""
+    campaign_name_en: str = ""
+    objective: str = ""
+    target_segments: List[SegmentMatch] = []
+    line_message: Optional[LineMessage] = None
+    recommended_products: List[str] = []
+    urgency: str = "evergreen"
+    estimated_reach: int = 0
+    source_trend: Optional[SourceTrend] = None

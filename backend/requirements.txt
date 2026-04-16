@@ -11,3 +11,7 @@ requests
 faiss-cpu
 langchain-community
 sentence-transformers
+openai
+scikit-learn
+numpy
+networkx

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f\\).read\\(\\)\\) for f in ['trend_engine.py','signal_map.py','campaign_engine.py','models.py','server.py']]; print\\('All files parse OK'\\)\")",
+      "Bash(python -c \"import ast; [ast.parse\\(open\\(f, encoding='utf-8'\\).read\\(\\)\\) for f in ['trend_engine.py','signal_map.py','campaign_engine.py','models.py','server.py']]; print\\('All files parse OK'\\)\")"
+    ]
+  }
+}
