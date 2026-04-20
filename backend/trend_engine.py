@@ -20,24 +20,33 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ── Embedding ────────────────────────────────────────────────────────────────
 
-def embed_texts(texts: List[str]) -> np.ndarray:
-    """Batch-embed texts via text-embedding-3-small (~$0.00002 / call)."""
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=texts,
-    )
-    return np.array([d.embedding for d in response.data])
+def embed_texts(texts: List[str], batch_size: int = 100) -> np.ndarray:
+    """Batch-embed texts via text-embedding-3-small. Splits into chunks to avoid API limits."""
+    all_embeddings = []
+    for i in range(0, len(texts), batch_size):
+        chunk = texts[i : i + batch_size]
+        # Truncate each text to avoid per-input token limit
+        chunk = [t[:2000] for t in chunk]
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=chunk,
+        )
+        all_embeddings.extend([d.embedding for d in response.data])
+    return np.array(all_embeddings)
 
 
 # ── Clustering ───────────────────────────────────────────────────────────────
 
 def cluster_articles(
     embeddings: np.ndarray,
-    eps: float = 0.25,
+    eps: float = 0.30,
     min_samples: int = 2,
 ) -> np.ndarray:
     """DBSCAN on cosine-distance.  Returns cluster labels (-1 = noise)."""
     distance_matrix = 1 - cosine_similarity(embeddings)
+    # Clip numerical noise to valid distance range [0, 2]
+    distance_matrix = np.clip(distance_matrix, 0, 2)
+    np.fill_diagonal(distance_matrix, 0.0)
     db = DBSCAN(eps=eps, min_samples=min_samples, metric="precomputed")
     return db.fit_predict(distance_matrix)
 
@@ -45,14 +54,20 @@ def cluster_articles(
 # ── Growth detection ─────────────────────────────────────────────────────────
 
 def _parse_date(date_str: str) -> Optional[datetime]:
-    """Best-effort date parsing for RSS-style date strings."""
+    """Best-effort date parsing. Always returns a timezone-aware datetime (UTC)."""
+    from datetime import timezone
     for fmt in (
         "%a, %d %b %Y %H:%M:%S %z",
         "%Y-%m-%dT%H:%M:%S.%f",
         "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%dT%H:%M:%S.%f+00:00",
     ):
         try:
-            return datetime.strptime(date_str, fmt)
+            dt = datetime.strptime(date_str, fmt)
+            # If naive (no tzinfo), assume UTC
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
         except (ValueError, TypeError):
             continue
     return None
@@ -67,7 +82,8 @@ def detect_growing_clusters(
     For each cluster, count articles in the recent window vs. older ones.
     A cluster whose recent share > 60 % is flagged as *emerging*.
     """
-    now = datetime.now().astimezone() if articles else datetime.now()
+    from datetime import timezone
+    now = datetime.now(tz=timezone.utc)
     cutoff = now - timedelta(hours=window_hours)
     clusters: Dict[int, Dict] = defaultdict(lambda: {"recent": 0, "old": 0, "indices": []})
 
@@ -121,6 +137,95 @@ def name_trend(headlines: List[str]) -> Dict:
     return json.loads(response.choices[0].message.content)
 
 
+# ── Cluster Map (2D PCA for visualization) ───────────────────────────────────
+
+def get_cluster_map() -> Dict:
+    """
+    Returns PCA-reduced 2D coordinates for every article, grouped by DBSCAN cluster.
+    Used for scatter-plot visualization of topic clusters.
+    """
+    import json
+    from sklearn.decomposition import PCA
+
+    articles = NewsStore.load()
+    articles = [a for a in articles if a.get("headline", "").strip()]
+    if len(articles) < 3:
+        return {"points": [], "clusters": [], "article_count": len(articles)}
+
+    texts = [
+        f"{a.get('headline', '')} {a.get('summary', '')}".strip()
+        for a in articles
+    ]
+    embeddings = embed_texts(texts)
+    labels = cluster_articles(embeddings)
+
+    # Reduce to 2D for visualization
+    n_components = min(2, embeddings.shape[0], embeddings.shape[1])
+    pca = PCA(n_components=n_components)
+    coords_2d = pca.fit_transform(embeddings)
+
+    # Group article indices by cluster for LLM naming
+    cluster_idx_map: Dict[int, list] = defaultdict(list)
+    for i, label in enumerate(labels):
+        cluster_idx_map[int(label)].append(i)
+
+    # Name each non-noise cluster via LLM
+    cluster_meta: Dict[int, Dict] = {}
+    for cid, indices in cluster_idx_map.items():
+        if cid == -1:
+            cluster_meta[-1] = {"name": "Unclustered", "category": "other"}
+            continue
+        headlines = [articles[i]["headline"] for i in indices[:10]]
+        try:
+            meta = name_trend(headlines)
+            cluster_meta[cid] = {
+                "name": meta.get("trend_name_en", f"Cluster {cid}"),
+                "name_th": meta.get("trend_name", ""),
+                "category": meta.get("category", "other"),
+                "summary": meta.get("summary", ""),
+            }
+        except Exception:
+            cluster_meta[cid] = {"name": f"Cluster {cid}", "category": "other"}
+
+    # Build point list
+    points = []
+    for i, label in enumerate(labels):
+        cid = int(label)
+        x = round(float(coords_2d[i][0]), 4)
+        y = round(float(coords_2d[i][1]), 4) if coords_2d.shape[1] > 1 else 0.0
+        points.append({
+            "x": x,
+            "y": y,
+            "cluster": cid,
+            "cluster_name": cluster_meta.get(cid, {}).get("name", f"Cluster {cid}"),
+            "category": cluster_meta.get(cid, {}).get("category", "other"),
+            "headline": articles[i].get("headline", ""),
+            "source": articles[i].get("source", ""),
+        })
+
+    # Cluster summary list (exclude noise for the legend)
+    unique_ids = sorted(set(int(l) for l in labels))
+    clusters = []
+    for cid in unique_ids:
+        meta = cluster_meta.get(cid, {})
+        clusters.append({
+            "id": cid,
+            "name": meta.get("name", f"Cluster {cid}"),
+            "name_th": meta.get("name_th", ""),
+            "category": meta.get("category", "other"),
+            "summary": meta.get("summary", ""),
+            "size": int(np.sum(labels == cid)),
+        })
+
+    return {
+        "points": points,
+        "clusters": clusters,
+        "article_count": len(articles),
+        "cluster_count": len([c for c in clusters if c["id"] != -1]),
+        "noise_count": int(np.sum(labels == -1)),
+    }
+
+
 # ── Public API ───────────────────────────────────────────────────────────────
 
 def detect_trends(window_days: int = 7) -> Dict:
@@ -133,8 +238,13 @@ def detect_trends(window_days: int = 7) -> Dict:
     if len(articles) < 3:
         return {"trends": [], "article_count": len(articles)}
 
+    # Filter out articles with no usable text
+    articles = [a for a in articles if a.get("headline", "").strip()]
+    if len(articles) < 3:
+        return {"trends": [], "article_count": len(articles)}
+
     texts = [
-        f"{a.get('headline', '')} {a.get('summary', '')}"
+        f"{a.get('headline', '')} {a.get('summary', '')}".strip()
         for a in articles
     ]
     embeddings = embed_texts(texts)

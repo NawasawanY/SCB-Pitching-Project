@@ -12,6 +12,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  FlaskConical,
+  Braces,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -19,7 +21,9 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: BarChart3 },
   { name: "Trending News", href: "/trending-news", icon: TrendingUp },
   { name: "AI Recommendation", href: "/recommendations", icon: Sparkles },
+  { name: "Topic Clusters", href: "/cluster-map", icon: Braces },
   { name: "Target Group", href: "/targets", icon: Users },
+  { name: "PoC Demo", href: "/poc", icon: FlaskConical },
 ]
 
 interface SidebarProps {

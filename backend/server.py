@@ -1,9 +1,12 @@
 import os
 import json
+import traceback
 from typing import Optional, Dict, Any, TypedDict, List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+
+load_dotenv()
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -17,11 +20,9 @@ from models import (
     TrendRadarResponse, SignalMapResponse, TrendCampaign,
 )
 from news_query import NewsFetcher, NewsStore
-from trend_engine import detect_trends
+from trend_engine import detect_trends, get_cluster_map
 from signal_map import build_signal_map
 from campaign_engine import generate_campaign_from_trend, generate_all_campaigns
-
-load_dotenv()
 
 app = FastAPI(title="SCB Pitching AI Backend - Insights Engine")
 
@@ -185,9 +186,9 @@ graph = workflow.compile()
 
 @app.get("/api/sync-news")
 async def sync_news():
-    """Fetches 50 news and updates the local store."""
+    """Fetches up to 1000 articles from all RSS sources and updates the local store."""
     try:
-        news = NewsFetcher.get_50_news()
+        news = NewsFetcher.fetch_all()
         added = NewsStore.save(news)
         return {"status": "success", "fetched": len(news), "added": added}
     except Exception as e:
@@ -264,6 +265,7 @@ async def get_trend_radar(window_days: int = 7):
         result = detect_trends(window_days=window_days)
         return result
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -298,6 +300,20 @@ async def generate_trend_campaign(trend: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/cluster-map")
+async def get_cluster_map_endpoint():
+    """
+    Returns PCA 2D coordinates for every article with DBSCAN cluster labels.
+    Used for scatter-plot visualization of topic clusters in the frontend.
+    """
+    try:
+        result = get_cluster_map()
+        return result
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/auto-campaigns")
 async def auto_generate_campaigns(top_n: int = 3, window_days: int = 7):
     """
@@ -316,6 +332,7 @@ async def auto_generate_campaigns(top_n: int = 3, window_days: int = 7):
             "article_count": trend_result.get("article_count", 0),
         }
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
