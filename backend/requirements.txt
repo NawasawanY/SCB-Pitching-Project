@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+langgraph
+langchain
+langchain-openai
+pydantic
+python-dotenv
+feedparser
+beautifulsoup4
+requests
+faiss-cpu
+langchain-community
+sentence-transformers
+openai
+scikit-learn
+numpy
+networkx
